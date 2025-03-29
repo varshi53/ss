@@ -1,0 +1,123 @@
+EXP 3
+import javax.crypto.*;
+
+class Main {
+    public static void main(String[] args) throws Exception {
+        Cipher c = Cipher.getInstance("DES");
+        SecretKey k = KeyGenerator.getInstance("DES").generateKey();
+        
+        byte[] text = "HELLO".getBytes();
+        c.init(Cipher.ENCRYPT_MODE, k);
+        byte[] enc = c.doFinal(text);
+        
+        c.init(Cipher.DECRYPT_MODE, k);
+        byte[] dec = c.doFinal(enc);
+
+        System.out.println("Encrypted: " + new String(enc));
+        System.out.println("Decrypted: " + new String(dec));
+    }
+}
+
+
+EXP 4
+class DiffieHellman {
+    public static void main(String[] args) {
+        long P = 23, G = 9, a = 4, b = 3;
+        long x = (long) Math.pow(G, a) % P, y = (long) Math.pow(G, b) % P;
+        System.out.println("Alice's Key: " + (long) Math.pow(y, a) % P);
+        System.out.println("Bob's Key: " + (long) Math.pow(x, b) % P);
+    }
+}
+
+
+EXP5
+import java.math.BigInteger;
+import java.security.*;
+
+class Main {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        for (String input : new String[]{"JavaTPoint", "HashFunc"}) {
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(input.getBytes());
+            System.out.println(input + " : " + String.format("%064x", new BigInteger(1, hash)));
+        }
+    }
+}
+
+
+ePX 6
+import java.math.BigInteger;
+import java.security.*;
+
+class Main {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] hash = md.digest("HashFunc".getBytes());
+        System.out.println("HashFunc : " + String.format("%032x", new BigInteger(1, hash)));
+    }
+}
+
+
+
+EXP 7
+import java.security.*;
+import java.util.Base64;
+
+public class DigitalSignature {
+    public static void main(String[] args) throws Exception {
+        KeyPair keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        byte[] data = "GEEKSFORGEEKS IS A COMPUTER SCIENCE PORTAL".getBytes();
+
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(keyPair.getPrivate());
+        sig.update(data);
+        byte[] signature = sig.sign();
+
+        sig.initVerify(keyPair.getPublic());
+        sig.update(data);
+        
+        // Encode & Truncate Signature
+        String encodedSig = Base64.getEncoder().encodeToString(signature);
+        String shortSig = encodedSig.substring(0, 20) + "..."; // Show only first 20 chars
+        
+        System.out.println("Signature: " + shortSig);
+        System.out.println("Verification: " + sig.verify(signature));
+    }
+}
+
+
+
+APPDI OUTPUT LONG AH IRRUTHHUNA ETHULA JUST 20 CHAR MATUM DISPLAY AGUM
+
+
+import java.util.*;
+
+class CaesarCipher {
+    public static String shift(String text, int s, boolean encrypt) {
+        StringBuilder result = new StringBuilder();
+        for (char ch : text.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                char base = Character.isUpperCase(ch) ? 'A' : 'a';
+                ch = (char) ((ch - base + (encrypt ? s : -s + 26)) % 26 + base);
+            }
+            result.append(ch);
+        }
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter text: ");
+        String text = sc.nextLine();
+        System.out.print("Enter shift: ");
+        int s = sc.nextInt();
+        
+        String encrypted = shift(text, s, true);
+        System.out.println("Encrypted: " + encrypted);
+        System.out.println("Decrypted: " + shift(encrypted, s, false));
+        sc.close();
+    }
+}
+
+
+
+caeser chiper both en and decryption in one code 👆 
