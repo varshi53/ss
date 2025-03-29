@@ -1,0 +1,398 @@
+EXp 1:
+
+PLAYFAIR:
+
+import java.util.*;
+class PlayfairCipher {
+    static String encrypt(String text, String key) {
+        text = text.replaceAll("J", "I").toUpperCase();
+        key = (key + "ABCDEFGHIKLMNOPQRSTUVWXYZ").replaceAll("(.)(?=.*\\1)", "");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < text.length(); i += 2) {
+            char a = text.charAt(i), b = (i + 1 < text.length()) ? text.charAt(i + 1) : 'X';
+            int p1 = key.indexOf(a), p2 = key.indexOf(b);
+            int r1 = p1 / 5, c1 = p1 % 5, r2 = p2 / 5, c2 = p2 % 5;
+            result.append(key.charAt(r1 * 5 + (c1 + 1) % 5)).append(key.charAt(r2 * 5 + (c2 + 1) % 5));
+        }
+        return result.toString();
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter text: ");
+        String text = sc.next().toUpperCase();
+        System.out.print("Enter key: ");
+        String key = sc.next().toUpperCase();
+        System.out.println("Encrypted: " + encrypt(text, key));
+        sc.close();
+    }
+}
+
+...........................
+
+
+CAESAR :
+
+import java.util.*;
+class CaesarCipher {
+    public static String shift(String text, int s, boolean encrypt) {
+        StringBuilder result = new StringBuilder();
+        for (char ch : text.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                char base = Character.isUpperCase(ch) ? 'A' : 'a';
+                ch = (char) ((ch - base + (encrypt ? s : -s + 26)) % 26 + base);
+            }
+            result.append(ch);
+        }
+        return result.toString();
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter text: ");
+        String text = sc.nextLine();
+        System.out.print("Enter shift: ");
+        int s = sc.nextInt();
+        String encrypted = shift(text, s, true);
+        System.out.println("Encrypted: " + encrypted);
+        System.out.println("Decrypted: " + shift(encrypted, s, false));
+        sc.close();
+    }
+}
+
+
+.........................................................................
+EXP 2:
+
+RAILFENCE:
+
+public class RailFenceCipher {
+    public static String encrypt(String text, int rails) {
+        StringBuilder result = new StringBuilder();
+        for (int rail = 0; rail < rails; rail++) {
+            int pos = rail;
+            int step = 2 * (rails - 1); 
+            while (pos < text.length()) {
+                result.append(text.charAt(pos));
+                if (rail == 0 || rail == rails - 1) {
+                    pos += step;
+                } else {
+                    int nextStep = step - 2 * rail;
+                    pos += (pos % step == rail) ? nextStep : 2 * rail;
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    public static String decrypt(String cipher, int rails) {
+        char[] result = new char[cipher.length()];
+        int pos = 0;
+        for (int rail = 0; rail < rails; rail++) {
+            int index = rail;
+            int step = 2 * (rails - 1);
+            while (index < cipher.length()) {
+                result[index] = cipher.charAt(pos++);
+                if (rail == 0 || rail == rails - 1) {
+                    index += step;
+                } else {
+                    int nextStep = step - 2 * rail;
+                    index += (index % step == rail) ? nextStep : 2 * rail;
+                }
+            }
+        }
+        return new String(result);
+    }
+    public static void main(String[] args) {
+        String text = "HELLOWORLD";
+        int rails = 3;
+        String encrypted = encrypt(text, rails);
+        System.out.println("Encrypted: " + encrypted);
+        String decrypted = decrypt(encrypted, rails);
+        System.out.println("Decrypted: " + decrypted);
+    }
+}
+
+.....................................................
+
+
+COLUMN 
+
+import java.util.Scanner;
+class Main {
+public static String decrypt(String ciphertext, int key) {
+int length = ciphertext.length();
+int numRows = (int) Math.ceil((double) length / key);
+char[][] grid = new char[numRows][key];
+int index = 0;
+for (int j = 0; j < key; j++) {
+for (int i = 0; i < numRows; i++) {
+if (index < length) {
+grid[i][j] = ciphertext.charAt(index++);
+}
+}
+}
+StringBuilder plaintext = new StringBuilder();
+for (int i = 0; i < numRows; i++) {
+for (int j = 0; j < key; j++) {
+if (grid[i][j] != 'X') { // Avoid adding padding characters
+plaintext.append(grid[i][j]);
+}
+}
+}
+return plaintext.toString();
+}
+public static void main(String[] args) {
+Scanner scanner = new Scanner(System.in);
+System.out.print("Enter the ciphertext: ");
+String ciphertext = scanner.nextLine();
+System.out.print("Enter the number of columns (key): ");
+int key = scanner.nextInt();
+String decryptedText = decrypt(ciphertext, key);
+System.out.println("Decrypted Text: " + decryptedText);
+scanner.close();
+}
+}
+
+.....................................................................................
+EXP 3 : DES ALGORITHM 
+
+🔹 Steps of DES Algorithm (Easy Explanation)
+1️⃣ Key Generation:
+
+A 56-bit key is prepared from a 64-bit input key.
+
+16 smaller keys (subkeys) are created.
+
+2️⃣ Initial Permutation (IP):
+
+The input data (plaintext) is shuffled using a fixed table.
+
+3️⃣ Splitting Data:
+
+The 64-bit input is split into two halves:
+
+Left half (L0)
+
+Right half (R0)
+
+4️⃣ 16 Rounds of Processing:
+
+The right half is modified using the left half and a subkey.
+
+This happens 16 times, with different subkeys each time.
+
+5️⃣ Final Permutation (IP⁻¹):
+
+After all 16 rounds, data is shuffled again using another table.
+
+6️⃣ Output:
+
+The final result is ciphertext (encrypted data).
+
+The process is reversed for decryption.
+
+import javax.crypto.*;
+class Main {
+    public static void main(String[] args) throws Exception {
+        Cipher c = Cipher.getInstance("DES");
+        SecretKey k = KeyGenerator.getInstance("DES").generateKey();
+        byte[] text = "HELLO".getBytes();
+        c.init(Cipher.ENCRYPT_MODE, k);
+        byte[] enc = c.doFinal(text);
+        c.init(Cipher.DECRYPT_MODE, k);
+        byte[] dec = c.doFinal(enc);
+        System.out.println("Encrypted: " + new String(enc));
+        System.out.println("Decrypted: " + new String(dec));
+    }
+}
+
+.......................................................................................
+experiment 4: DIFF HELLMAN 
+
+Diffie-Hellman Key Exchange (Simple Explanation)
+Diffie-Hellman (DH) is a cryptographic algorithm used for securely exchanging keys over an insecure channel. It allows two parties (e.g., Alice and Bob) to generate a shared secret key without directly sending it over the network.
+
+How Diffie-Hellman Works (Easy Steps)
+1️⃣ Choose Public Values
+
+Both parties agree on a large prime number p and a base (primitive root) g.
+
+These values are publicly shared and don’t need to be secret.
+
+2️⃣ Generate Private Keys
+
+Each party picks a random private key:
+
+Alice picks a
+
+Bob picks b
+
+3️⃣ Compute Public Keys
+
+Alice computes: A = g^a mod p
+
+Bob computes: B = g^b mod p
+
+Both A and B are shared publicly.
+
+4️⃣ Compute Shared Secret
+
+Alice computes: S = B^a mod p
+
+Bob computes: S = A^b mod p
+
+Since (g^b)^a mod p = (g^a)^b mod p, both compute the same secret key.
+
+class DiffieHellman {
+    public static void main(String[] args) {
+        long P = 23, G = 9, a = 4, b = 3;
+        long x = (long) Math.pow(G, a) % P, y = (long) Math.pow(G, b) % P;
+        System.out.println("Alice's Key: " + (long) Math.pow(y, a) % P);
+        System.out.println("Bob's Key: " + (long) Math.pow(x, b) % P);
+    }
+}
+
+.........................................................................................
+experiment 5: SHA
+
+SHA-256 Algorithm (Simple Explanation)
+SHA-256 (Secure Hash Algorithm 256-bit) is a cryptographic hashing algorithm that converts any input (text, file, etc.) into a fixed 256-bit (64-character) hash. It is part of the SHA-2 family and is much stronger than MD5.
+
+How SHA-256 Works (Easy Steps)
+1️⃣ Padding the Message
+
+The message is expanded to a length that is 64 bits less than a multiple of 512.
+
+A 1 bit is added, followed by 0s, until the correct length is reached.
+
+The original length of the message (in bits) is added at the end.
+
+2️⃣ Initialize SHA-256 Hash Values
+
+Uses 8 fixed 32-bit values:
+
+ini
+Copy code
+H0 = 0x6a09e667, H1 = 0xbb67ae85, H2 = 0x3c6ef372, H3 = 0xa54ff53a
+H4 = 0x510e527f, H5 = 0x9b05688c, H6 = 0x1f83d9ab, H7 = 0x5be0cd19
+3️⃣ Process Message in 512-bit Blocks
+
+The message is divided into 512-bit chunks.
+
+Each chunk is processed using 64 rounds of complex bitwise operations and mathematical functions.
+
+64 constant values (K) are used in each round.
+
+4️⃣ Update Hash Values
+
+After all rounds, the H0-H7 values are updated and combined to generate the final 256-bit (64-character) hash.
+
+
+import java.math.BigInteger;
+import java.security.*;
+
+class Main {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        for (String s : new String[]{"JavaTPoint", "HashFunc"})
+            System.out.println(s + " : " + String.format("%064x", new BigInteger(1, md.digest(s.getBytes()))));
+    }
+}
+
+
+............................................................................................
+
+experiment 6: MD5
+
+MD5 Algorithm (Easy Explanation)
+MD5 (Message Digest Algorithm 5) is a hashing algorithm that takes any input (text, file, etc.) and converts it into a fixed 128-bit hash value (like a digital fingerprint). It is mainly used for checking data integrity but is not secure for encryption due to vulnerabilities.
+
+How MD5 Works (Simple Steps)
+1️⃣ Padding (Adding Extra Bits)
+
+The message is expanded to a length that is 64 bits less than a multiple of 512.
+
+A 1 bit is added, followed by 0s, until the correct length is reached.
+
+2️⃣ Appending Message Length
+
+The original length of the message is added at the end in 64-bit format.
+
+3️⃣ Initialize MD5 Variables
+
+Four fixed 32-bit values are used:
+A = 0x67452301, B = 0xEFCDAB89, C = 0x98BADCFE, D = 0x10325476
+
+4️⃣ Processing in Blocks (512 bits each)
+
+The message is broken into 512-bit chunks.
+
+Each chunk goes through 64 rounds of mathematical transformations (bitwise operations, shifts, and additions).
+
+5️⃣ Generate Final Hash
+
+After all rounds, A, B, C, and D are combined to produce the final 128-bit hash.
+
+
+import java.math.BigInteger;
+import java.security.*;
+
+class Main {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] hash = md.digest("HashFunc".getBytes());
+        System.out.println("HashFunc : " + String.format("%032x", new BigInteger(1, hash)));
+    }
+}
+
+...............................................................................................
+
+EX 7 : digital signature standard
+
+### **Digital Signature Standard (DSS) - Short Definition**  
+The **Digital Signature Standard (DSS)** is a cryptographic standard for **digital signatures**, ensuring **authentication, data integrity, and non-repudiation** in electronic communications. It is based on the **DSA (Digital Signature Algorithm)** and other cryptographic methods like RSA or ECDSA.
+
+---
+
+### **Simple Steps of DSS Algorithm**  
+
+1. **Key Generation**  
+   - Generate a private key (signing key).  
+   - Derive a public key (verification key).  
+
+2. **Signing Process**  
+   - Compute the hash of the message.  
+   - Use the private key to sign the hash and create the digital signature.  
+
+3. **Verification Process**  
+   - The receiver computes the message hash.  
+   - The public key is used to verify the signature against the hash.  
+   - If they match, the message is authentic; otherwise, it is rejected.  
+
+---
+
+This ensures **secure authentication** and **data integrity** in digital communications. 🚀
+
+
+
+import java.security.*;
+import java.util.Base64;
+public class DigitalSignature {
+    public static void main(String[] args) throws Exception {
+        KeyPair kp = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(kp.getPrivate());
+        sig.update("GEEKSFORGEEKS".getBytes());
+        byte[] signature = sig.sign();
+        sig.initVerify(kp.getPublic());
+        sig.update("GEEKSFORGEEKS".getBytes());
+        System.out.println("Signature: " + Base64.getEncoder().encodeToString(signature).substring(0, 20) + "...");
+        System.out.println("Verified: " + sig.verify(signature));
+    }
+}
+
+
+.................................................................................................
+
+
+
+
