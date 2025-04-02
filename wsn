@@ -1,0 +1,234 @@
+EXPERIMENT 1:
+
+#include "ns3/core-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/wifi-module.h"
+using namespace ns3;
+int main()
+{
+    NodeContainer nodes;
+    nodes.Create(2);
+    WifiHelper wifi;
+    NetDeviceContainer devices = wifi.Install(YansWifiPhyHelper::Default(), WifiMacHelper(), nodes);
+    InternetStackHelper internet;
+    internet.Install(nodes);
+    Ipv4AddressHelper ipv4;
+    ipv4.SetBase("10.1.1.0", "255.255.255.0");
+    ipv4.Assign(devices);
+    UdpEchoServerHelper server(9);
+    server.Install(nodes.Get(0)).Start(Seconds(1.0));
+    UdpEchoClientHelper client(Ipv4Address("10.1.1.1"), 9);
+    client.SetAttribute("MaxPackets", UintegerValue(2));
+    client.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    client.SetAttribute("PacketSize", UintegerValue(1024));
+    client.Install(nodes.Get(1)).Start(Seconds(2.0));
+    Simulator::Run();
+    Simulator::Destroy();
+    return 0;
+}
+.............................................................................................
+EXPERIMENT 2:
+
+#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+    Serial.begin(9600);
+    Serial.println("DHTxx test!");
+    dht.begin();
+}
+
+void loop() {
+    delay(2000);
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+
+    if (isnan(humidity) || isnan(temperature)) {
+        Serial.println("Failed to read from DHT sensor!");
+        return;
+    }
+
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.print(" %\t");
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.println(" *C");
+}
+..................
+PYTHON VISUALIZATION :
+
+import matplotlib.pyplot as plt
+import pandas as pd
+data = pd.read_csv("sensor_data.csv")
+plt.figure(figsize=(10, 5))
+plt.plot(data['Time'], data['Temperature'], label='Temperature (°C)')
+plt.plot(data['Time'], data['Humidity'], label='Humidity (%)')
+plt.xlabel('Time (s)')
+plt.ylabel('Value')
+plt.title('Temperature and Humidity Over Time')
+plt.legend()
+plt.grid()
+plt.show()
+
+.............................................................................................
+EXPERIMENT 3:
+
+#include "ns3/core-module.h"
+#include "ns3/wifi-module.h"
+using namespace ns3;
+
+int main()
+{
+    NodeContainer nodes;
+    nodes.Create(2);
+
+    WifiHelper wifi;
+    NetDeviceContainer devices = wifi.Install(YansWifiPhyHelper::Default(), WifiMacHelper(), nodes);
+
+    InternetStackHelper internet;
+    internet.Install(nodes);
+
+    Ipv4AddressHelper ipv4;
+    ipv4.SetBase("10.1.1.0", "255.255.255.0");
+    ipv4.Assign(devices);
+
+    UdpEchoServerHelper server(9);
+    server.Install(nodes.Get(0)).Start(Seconds(1.0));
+
+    UdpEchoClientHelper client("10.1.1.1", 9);
+    client.SetAttribute("MaxPackets", UintegerValue(5));
+    client.SetAttribute("Interval", TimeValue(Seconds(1.0)));
+    client.Install(nodes.Get(1)).Start(Seconds(2.0));
+
+    Simulator::Run();
+    Simulator::Destroy();
+    return 0;
+}
+..............................................................................................
+EXPERIMENT 4:
+
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+using namespace ns3;
+void CheckPacket(Ptr<Socket> socket)
+{
+    Ptr<Packet> p = socket->Recv();
+    if (p->GetSize() > 1024) {
+        std::cout << "ALERT: Suspicious large packet detected!\n";
+    }
+}
+int main()
+{
+    NodeContainer nodes;
+    nodes.Create(2);
+    InternetStackHelper internet;
+    internet.Install(nodes);
+
+    Ipv4AddressHelper address;
+    address.SetBase("10.1.1.0", "255.255.255.0");
+    address.Assign(nodes);
+
+    UdpEchoServerHelper server(9);
+    server.Install(nodes.Get(1));
+    server.Start(Seconds(1.0));
+
+    UdpEchoClientHelper client(Ipv4Address("10.1.1.2"), 9);
+    ApplicationContainer clientApp = client.Install(nodes.Get(0));
+    clientApp.Start(Seconds(2.0));
+
+    Ptr<Socket> serverSocket = Socket::CreateSocket(nodes.Get(1), UdpSocketFactory::GetTypeId());
+    serverSocket->Bind(InetSocketAddress(Ipv4Address::GetAny(), 9));
+    serverSocket->SetRecvCallback(MakeCallback(&CheckPacket));
+
+    Simulator::Run();
+    Simulator::Destroy();
+
+    return 0;
+}
+...................................................................................
+EXPERIMENT 5:
+
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/wifi-module.h"
+
+using namespace ns3;
+
+Vector EstimatePosition(Vector anchor1, Vector anchor2, Vector anchor3, double d1, double d2, double d3) {
+    double x = (d1 + d2 + d3) / 3.0;
+    double y = (d1 + d2 + d3) / 3.0;
+    return Vector(x, y, 0);
+}
+
+int main(int argc, char *argv[]) {
+    Vector estimatedPosition = EstimatePosition(Vector(0, 0, 0), Vector(100, 0, 0), Vector(50, 50, 0), 10.0, 10.0, 10.0);
+    std::cout << "Estimated Position: " << estimatedPosition << std::endl;
+
+    Simulator::Run();
+    Simulator::Destroy();
+    return 0;
+}
+
+..........................................................................
+EXPERIMENT 6:
+
+import paho.mqtt.client as mqtt
+import random
+import time
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+    client.subscribe("sensor/data")
+
+def on_message(client, userdata, msg):
+    print(f"Received message: {msg.payload.decode()}")
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("localhost", 1883, 60)
+
+while True:
+    sensor_data = random.randint(20, 30)
+    client.publish("sensor/data", sensor_data)
+    time.sleep(2)
+
+.........................................................................
+EXPERIMENT 7:
+
+import paho.mqtt.client as mqtt
+
+client = mqtt.Client()
+client.connect("localhost", 1883, 60)
+
+client.publish("home/lights", "ON")
+client.publish("home/lights", "OFF")
+..........................................................................
+EXPERIMENT 8:
+
+import paho.mqtt.client as mqtt
+import random
+import time
+
+client = mqtt.Client()
+client.connect("localhost", 1883, 60)
+
+while True:
+    temperature = random.randint(20, 30)
+    humidity = random.randint(30, 70)
+    air_quality = random.randint(50, 100)
+    
+    client.publish("environment/temperature", temperature)
+    client.publish("environment/humidity", humidity)
+    client.publish("environment/air_quality", air_quality)
+    
+    time.sleep(5)
+................................................................................
